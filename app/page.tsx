@@ -1,3 +1,5 @@
+import { assessCoach } from "@/lib/coach";
+
 type DataRow = Record<string, unknown>;
 
 type CoachData = {
@@ -129,6 +131,7 @@ export default async function Home() {
     { title: "Weekly Load", value: formatNumber(weeklyLoad), sub: `${weeklyActivities.length} activiteiten · 7 dagen` },
   ];
 
+  const coach = assessCoach(latest, weeklyLoad);
   const recent = activities.slice(0, 5);
   const garminCount = activities.filter(
     (a) => textFrom(a, ["source"])?.toUpperCase() === "GARMIN"
@@ -139,7 +142,7 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.2</p>
+            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.3</p>
             <h1 className="text-4xl font-bold">AI Football Coach</h1>
             <p className="mt-2 text-zinc-400">Football · Conditioning · Strength · Recovery</p>
           </div>
@@ -162,6 +165,29 @@ export default async function Home() {
               <p className="mt-2 text-xs text-zinc-500">{card.sub}</p>
             </div>
           ))}
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-emerald-900 bg-emerald-950/30 p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-sm text-emerald-400">AI COACH · {coach.status}</p>
+              <h2 className="mt-2 text-2xl font-semibold">{coach.title}</h2>
+              <p className="mt-3 leading-7 text-zinc-300">{coach.summary}</p>
+            </div>
+            <div className="rounded-xl border border-emerald-900/70 bg-zinc-950/40 px-4 py-3 text-sm">
+              Confidence: <span className="font-semibold">{coach.confidence}</span>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-2 md:grid-cols-2">
+            {coach.reasons.slice(0, 6).map((reason) => (
+              <div key={reason} className="rounded-xl border border-zinc-800 bg-zinc-950/50 p-3 text-sm text-zinc-400">
+                {reason}
+              </div>
+            ))}
+          </div>
+          <p className="mt-5 text-xs leading-5 text-zinc-500">
+            Coachadvies gebruikt alleen beschikbare trainings- en hersteldata. HRV en rusthartslag worden pas als trend gebruikt zodra meerdere metingen beschikbaar zijn; medische beslissingen worden niet geautomatiseerd.
+          </p>
         </section>
 
         <section className="mt-6 grid gap-6 lg:grid-cols-3">
