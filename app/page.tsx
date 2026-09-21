@@ -1,4 +1,5 @@
 import { assessCoach } from "@/lib/coach";
+import { buildDayPlan } from "@/lib/day-plan";
 
 type DataRow = Record<string, unknown>;
 
@@ -132,6 +133,7 @@ export default async function Home() {
   ];
 
   const coach = assessCoach(latest, weeklyLoad);
+  const dayPlan = buildDayPlan(coach);
   const recent = activities.slice(0, 5);
   const garminCount = activities.filter(
     (a) => textFrom(a, ["source"])?.toUpperCase() === "GARMIN"
@@ -142,7 +144,7 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.3</p>
+            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.4</p>
             <h1 className="text-4xl font-bold">AI Football Coach</h1>
             <p className="mt-2 text-zinc-400">Football · Conditioning · Strength · Recovery</p>
           </div>
@@ -188,6 +190,33 @@ export default async function Home() {
           <p className="mt-5 text-xs leading-5 text-zinc-500">
             Coachadvies gebruikt alleen beschikbare trainings- en hersteldata. HRV en rusthartslag worden pas als trend gebruikt zodra meerdere metingen beschikbaar zijn; medische beslissingen worden niet geautomatiseerd.
           </p>
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-zinc-400">TODAY · {dayPlan.day.toUpperCase()}</p>
+              <h2 className="mt-1 text-2xl font-semibold">{dayPlan.primary}</h2>
+            </div>
+            <span className="rounded-full border border-zinc-700 bg-zinc-950 px-4 py-2 text-sm text-zinc-300">
+              {dayPlan.target}
+            </span>
+          </div>
+
+          <div className="mt-6 grid gap-3 md:grid-cols-3">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+              <p className="text-xs text-zinc-500">GYM</p>
+              <p className="mt-2 text-sm text-zinc-200">{dayPlan.gym}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+              <p className="text-xs text-zinc-500">CONDITIONING</p>
+              <p className="mt-2 text-sm text-zinc-200">{dayPlan.conditioning}</p>
+            </div>
+            <div className="rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+              <p className="text-xs text-zinc-500">COACH NOTE</p>
+              <p className="mt-2 text-sm text-zinc-200">{dayPlan.note}</p>
+            </div>
+          </div>
         </section>
 
         <section className="mt-6 grid gap-6 lg:grid-cols-3">
