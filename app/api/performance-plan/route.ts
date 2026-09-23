@@ -7,10 +7,21 @@ type DayChoice = {
   note?: string;
 };
 
+type DailyCheckIn = {
+  energy?: number;
+  legSoreness?: number;
+  shinPain?: number;
+  motivation?: number;
+  availableMinutes?: number;
+  note?: string;
+};
+
 type RequestBody = {
   days?: Record<string, DayChoice>;
   gymDaysTarget?: number;
   legDayTarget?: number;
+  conditioningPriority?: number;
+  checkIn?: DailyCheckIn;
   force?: boolean;
 };
 
@@ -134,7 +145,10 @@ export async function POST(request: Request) {
       targets: {
         gymDays: body.gymDaysTarget ?? 5,
         legDays: body.legDayTarget ?? 1,
+        conditioningPriority: body.conditioningPriority ?? 5,
+        conditioningGoal: "Specifiek betere voetbalconditie: aerobe basis, herstel tussen acties en repeated-sprint capacity opbouwen zonder krachtverlies.",
       },
+      dailyCheckIn: body.checkIn ?? null,
       userChoices: body.days ?? {},
       wellness: wellness.slice(0, 10).map((row) => ({
         date: dateValue(row),
@@ -162,6 +176,10 @@ export async function POST(request: Request) {
         "Geen onnodige zware benen vlak voor wedstrijd of zware voetbaltraining.",
         "Krachttraining hoeft geen oefenlijst te bevatten; gebruik alleen focus zoals Push, Pull, Upper, Legs of Rest.",
         "Conditioning moet WEL concreet zijn: duur, intervallen, rust en intensiteit/zone.",
+        "Plan minimaal één gerichte conditioningsprikkel buiten voetbal wanneer herstel en wedstrijdplanning dit toelaten; bij hoge conditioningPriority liefst twee, maar nooit ten koste van wedstrijdfrisheid.",
+        "Wissel slim tussen zone 2, voetbal-specifieke intervals/repeated efforts en herstel.",
+        "Als shinPain 4-6 is: vervang extra hardloopconditioning door low-impact bike/elliptical/rower en beperk impact. Als shinPain 7-10 is: geen extra running/jumping/sprints en adviseer beoordeling als pijn toeneemt, looppatroon verandert of pijn in rust aanwezig is.",
+        "Gebruik dagelijkse energie, beenspierpijn, motivatie en beschikbare tijd om volume/intensiteit te schalen.",
         "Hou teksten kort en scanbaar.",
         "Verzin geen ontbrekende slaap/HRV data.",
       ],
@@ -181,7 +199,7 @@ export async function POST(request: Request) {
             role: "system",
             content: [{
               type: "input_text",
-              text: "Je bent een zeer praktische voetbal performance coach. Maak één stabiele weekplanning die de gebruiker pas opnieuw genereert als zijn planning verandert. Optimaliseer voetbalconditie, herstel en behoud van kracht/spiermassa. Geef compacte output. Bij conditioning geef je concrete protocollen. Bij dubbele gym+voetbal dagen geef je duidelijke volgorde. Antwoord uitsluitend volgens het JSON-schema."
+              text: "Je bent een elite maar praktische voetbal performance coach. Hoofddoel is aantoonbaar betere voetbalconditie terwijl kracht en spiermassa behouden blijven. Maak één stabiele weekplanning die alleen opnieuw wordt gegenereerd als de gebruiker dat vraagt. Combineer voetbal, gym en gerichte conditioning; conditioning mag niet verdwijnen alleen omdat er gym en voetbal is. Gebruik concrete conditioningsprotocollen, geef bij gym+voetbal duidelijke volgorde, respecteer pijn/check-in signalen en houd output compact. Antwoord uitsluitend volgens het JSON-schema."
             }]
           },
           { role: "user", content: [{ type: "input_text", text: JSON.stringify(context) }] }
