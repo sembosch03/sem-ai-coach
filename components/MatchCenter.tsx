@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import MatchPrepChecklist from "@/components/MatchPrepChecklist";
 
 type Readiness = {
   readiness: number;
@@ -105,6 +106,8 @@ export default function MatchCenter() {
           </div>
         </div>
       </section>
+
+      <MatchPrepChecklist />
 
       <p className="text-[10px] text-zinc-600">{data.disclaimer}</p>
     </div>
