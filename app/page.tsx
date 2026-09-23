@@ -2,6 +2,9 @@ import { assessCoach } from "@/lib/coach";
 import { buildDayPlan } from "@/lib/day-plan";
 import AiCoachPlan from "@/components/AiCoachPlan";
 import AiWeekPlan from "@/components/AiWeekPlan";
+import AuthBar from "@/components/AuthBar";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 type DataRow = Record<string, unknown>;
 
@@ -88,6 +91,18 @@ async function getCoachData(): Promise<CoachData> {
 }
 
 export default async function Home() {
+  let authEmail: string | null = null;
+  const supabase = await createServerSupabaseClient();
+
+  if (supabase) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) redirect("/login");
+    authEmail = user.email ?? null;
+  }
+
   const data = await getCoachData();
   const activities = [...(data.activities ?? [])].sort((a, b) =>
     dateValue(b).localeCompare(dateValue(a))
@@ -161,12 +176,15 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.7</p>
+            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.8</p>
             <h1 className="text-4xl font-bold">AI Football Coach</h1>
             <p className="mt-2 text-zinc-400">Football · Conditioning · Strength · Recovery</p>
           </div>
-          <div className="rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm">
-            Intervals.icu ● {data.error ? "Error" : "Live"}
+          <div className="flex items-center gap-3">
+            <div className="rounded-full border border-zinc-800 bg-zinc-900 px-4 py-2 text-sm">
+              Intervals.icu ● {data.error ? "Error" : "Live"}
+            </div>
+            {supabase && <AuthBar email={authEmail} />}
           </div>
         </header>
 
