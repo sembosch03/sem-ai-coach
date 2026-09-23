@@ -85,3 +85,34 @@ on public.daily_checkins
 for update
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+
+create table if not exists public.athlete_profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  display_name text not null default 'Sem',
+  team text not null default '',
+  position text not null default '',
+  age integer not null default 22,
+  height_cm integer not null default 180,
+  weight_kg numeric not null default 80,
+  primary_goal text not null default '',
+  gym_days_target integer not null default 5,
+  football_days_target integer not null default 2,
+  conditioning_priority integer not null default 5,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.athlete_profiles enable row level security;
+
+create policy "Users can read own athlete profile"
+on public.athlete_profiles for select
+using (auth.uid() = user_id);
+
+create policy "Users can insert own athlete profile"
+on public.athlete_profiles for insert
+with check (auth.uid() = user_id);
+
+create policy "Users can update own athlete profile"
+on public.athlete_profiles for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
