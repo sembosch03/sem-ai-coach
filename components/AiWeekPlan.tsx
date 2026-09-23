@@ -38,7 +38,6 @@ const defaults: Preferences = {
 export default function AiWeekPlan() {
   const [data, setData] = useState<Payload | null>(null);
   const [preferences, setPreferences] = useState<Preferences>(defaults);
-  const [ready, setReady] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
@@ -64,8 +63,6 @@ export default function AiWeekPlan() {
           setPreferences(next);
           await loadPlan(next);
         }
-      } finally {
-        if (active) setReady(true);
       }
     }
 
