@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import DailyCheckIn, { type DailyCheckInData } from "@/components/DailyCheckIn";
 import ConditioningLab from "@/components/ConditioningLab";
+import ProgressionEngine from "@/components/ProgressionEngine";
 
 type DayMode = "auto" | "gym" | "football" | "gym_football" | "match" | "rest" | "unavailable";
 
@@ -274,6 +275,8 @@ export default function PerformanceOS() {
       <DailyCheckIn onChange={setCheckIn} />
 
       <ConditioningLab checkIn={checkIn} />
+
+      <ProgressionEngine />
 
       {progress && (
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
