@@ -28,6 +28,7 @@ type Tip = {
 
 export default function SmartTips() {
   const [data, setData] = useState<Readiness | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/readiness", { cache: "no-store" })
@@ -99,25 +100,33 @@ export default function SmartTips() {
 
   if (!data) return null;
 
+  const visible = open ? tips : tips.slice(0, 2);
+
   return (
-    <section className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-      <div className="flex items-center justify-between">
+    <section className="app-card mt-4 p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs text-zinc-500">SMART TIPS</p>
-          <h2 className="mt-1 text-lg font-semibold">Kleine wins voor vandaag</h2>
+          <p className="app-eyebrow">Slimme tips</p>
+          <h2 className="mt-1 text-base font-semibold tracking-tight">Kleine wins voor vandaag</h2>
         </div>
-        <span className="text-[10px] text-zinc-600">0 AI tokens</span>
+        {tips.length > 2 && (
+          <button onClick={() => setOpen((v) => !v)} className="rounded-full bg-white/[.045] px-3 py-1.5 text-xs text-zinc-400 hover:text-white">
+            {open ? "Minder" : "Meer"}
+          </button>
+        )}
       </div>
 
-      <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-        {tips.map((tip) => (
-          <article key={tip.title} className="rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xl">{tip.icon}</span>
-              <span className="text-[9px] text-zinc-600">{tip.tag}</span>
+      <div className="mt-3 grid gap-2 md:grid-cols-2">
+        {visible.map((tip) => (
+          <article key={tip.title} className="app-card-soft flex gap-3 p-3.5">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white/[.04] text-lg">{tip.icon}</div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium text-zinc-200">{tip.title}</p>
+                <span className="text-[9px] font-medium text-zinc-600">{tip.tag}</span>
+              </div>
+              <p className="mt-1 text-xs leading-5 text-zinc-500">{tip.text}</p>
             </div>
-            <p className="mt-2 text-sm font-semibold">{tip.title}</p>
-            <p className="mt-1 text-xs leading-5 text-zinc-500">{tip.text}</p>
           </article>
         ))}
       </div>
