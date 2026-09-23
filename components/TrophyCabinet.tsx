@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import ActivityHeatmap from "@/components/ActivityHeatmap";
 
 type Trophy = {
   id: string;
@@ -102,6 +103,8 @@ export default function TrophyCabinet() {
           </article>
         ))}
       </section>
+
+      <ActivityHeatmap />
 
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
         <p className="text-xs text-zinc-500">ACTIVE MISSIONS</p>
