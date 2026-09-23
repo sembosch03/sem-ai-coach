@@ -26,3 +26,30 @@ on public.coach_preferences
 for update
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+
+create table if not exists public.weekly_plans (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  week_start date not null,
+  plan jsonb not null,
+  generated_at timestamptz not null default now(),
+  primary key (user_id, week_start)
+);
+
+alter table public.weekly_plans enable row level security;
+
+create policy "Users can read own weekly plans"
+on public.weekly_plans
+for select
+using (auth.uid() = user_id);
+
+create policy "Users can insert own weekly plans"
+on public.weekly_plans
+for insert
+with check (auth.uid() = user_id);
+
+create policy "Users can update own weekly plans"
+on public.weekly_plans
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
