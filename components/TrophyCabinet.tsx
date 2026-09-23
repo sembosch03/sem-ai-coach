@@ -46,14 +46,14 @@ export default function TrophyCabinet() {
 
   return (
     <div className="space-y-4">
-      <section className="overflow-hidden rounded-3xl border border-amber-900/50 bg-gradient-to-br from-amber-950/30 via-zinc-900 to-zinc-950 p-6">
+      <section className="app-card p-5 sm:p-6">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs text-amber-400">TROPHY CABINET</p>
-            <h1 className="mt-1 text-3xl font-bold">{unlocked}/{data.trophies.length} unlocked</h1>
+            <p className="app-eyebrow">TROPHY CABINET</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{unlocked}/{data.trophies.length} unlocked</h1>
             <p className="mt-2 text-sm text-zinc-400">Verdien ze door echte training, niet door op knopjes te drukken.</p>
           </div>
-          <div className="rounded-2xl border border-violet-900 bg-violet-950/30 px-6 py-4">
+          <div className="rounded-2xl border border-white/[.06] bg-white/[.025] px-5 py-4">
             <p className="text-xs text-violet-300">CURRENT LEVEL</p>
             <p className="mt-1 text-3xl font-black">LVL {data.level}</p>
             <div className="mt-3 h-2 w-48 overflow-hidden rounded-full bg-zinc-800">
@@ -106,7 +106,7 @@ export default function TrophyCabinet() {
 
       <ActivityHeatmap />
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+      <section className="app-card p-5">
         <p className="text-xs text-zinc-500">ACTIVE MISSIONS</p>
         <div className="mt-3 grid gap-2 md:grid-cols-3">
           {data.missions.map((mission) => (
