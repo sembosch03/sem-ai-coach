@@ -1,5 +1,6 @@
 import AuthBar from "@/components/AuthBar";
 import TopNav from "@/components/TopNav";
+import SmartTips from "@/components/SmartTips";
 import PerformanceOS from "@/components/PerformanceOS";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -167,6 +168,8 @@ export default async function Home() {
           <p className="text-xs text-emerald-400">TODAY TIP</p>
           <p className="mt-1 text-sm text-zinc-300">{quickTip}</p>
         </section>
+
+        <SmartTips />
 
         <PerformanceOS />
 
