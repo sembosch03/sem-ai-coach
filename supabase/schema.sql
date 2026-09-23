@@ -11,16 +11,19 @@ create table if not exists public.coach_preferences (
 
 alter table public.coach_preferences enable row level security;
 
+drop policy if exists "Users can read own coach preferences" on public.coach_preferences;
 create policy "Users can read own coach preferences"
 on public.coach_preferences
 for select
 using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own coach preferences" on public.coach_preferences;
 create policy "Users can insert own coach preferences"
 on public.coach_preferences
 for insert
 with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own coach preferences" on public.coach_preferences;
 create policy "Users can update own coach preferences"
 on public.coach_preferences
 for update
@@ -38,16 +41,19 @@ create table if not exists public.weekly_plans (
 
 alter table public.weekly_plans enable row level security;
 
+drop policy if exists "Users can read own weekly plans" on public.weekly_plans;
 create policy "Users can read own weekly plans"
 on public.weekly_plans
 for select
 using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own weekly plans" on public.weekly_plans;
 create policy "Users can insert own weekly plans"
 on public.weekly_plans
 for insert
 with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own weekly plans" on public.weekly_plans;
 create policy "Users can update own weekly plans"
 on public.weekly_plans
 for update
@@ -70,16 +76,19 @@ create table if not exists public.daily_checkins (
 
 alter table public.daily_checkins enable row level security;
 
+drop policy if exists "Users can read own daily checkins" on public.daily_checkins;
 create policy "Users can read own daily checkins"
 on public.daily_checkins
 for select
 using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own daily checkins" on public.daily_checkins;
 create policy "Users can insert own daily checkins"
 on public.daily_checkins
 for insert
 with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own daily checkins" on public.daily_checkins;
 create policy "Users can update own daily checkins"
 on public.daily_checkins
 for update
@@ -104,14 +113,17 @@ create table if not exists public.athlete_profiles (
 
 alter table public.athlete_profiles enable row level security;
 
+drop policy if exists "Users can read own athlete profile" on public.athlete_profiles;
 create policy "Users can read own athlete profile"
 on public.athlete_profiles for select
 using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own athlete profile" on public.athlete_profiles;
 create policy "Users can insert own athlete profile"
 on public.athlete_profiles for insert
 with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own athlete profile" on public.athlete_profiles;
 create policy "Users can update own athlete profile"
 on public.athlete_profiles for update
 using (auth.uid() = user_id)
@@ -133,10 +145,12 @@ create table if not exists public.session_feedback (
 
 alter table public.session_feedback enable row level security;
 
+drop policy if exists "Users can read own session feedback" on public.session_feedback;
 create policy "Users can read own session feedback"
 on public.session_feedback for select
 using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert own session feedback" on public.session_feedback;
 create policy "Users can insert own session feedback"
 on public.session_feedback for insert
 with check (auth.uid() = user_id);
