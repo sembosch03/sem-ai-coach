@@ -82,6 +82,11 @@ export async function GET() {
     const weeksActive42 = activeWeeks.size;
     const distanceKm7 =
       week.reduce((sum, a) => sum + (numberFrom(a, ["distance"]) ?? 0), 0) / 1000;
+    const totalMinutes28 = Math.round(
+      month.reduce((sum, a) => sum + (numberFrom(a, ["moving_time", "elapsed_time"]) ?? 0), 0) / 60
+    );
+    const distanceKm28 =
+      month.reduce((sum, a) => sum + (numberFrom(a, ["distance"]) ?? 0), 0) / 1000;
 
     const xp =
       month.length * 50 +
@@ -149,6 +154,78 @@ export async function GET() {
         progress: Math.min(1, weeksActive42 / 3),
         detail: "Actief in 3 verschillende weken",
       },
+      {
+        id: "iron-week",
+        name: "Iron Week",
+        icon: "⚙️",
+        unlocked: week.length >= 7,
+        progress: Math.min(1, week.length / 7),
+        detail: "7 activiteiten in 7 dagen",
+      },
+      {
+        id: "football-triple",
+        name: "Triple Threat",
+        icon: "🥅",
+        unlocked: football7 >= 3,
+        progress: Math.min(1, football7 / 3),
+        detail: "3 voetbalprikkels in 7 dagen",
+      },
+      {
+        id: "engine-5",
+        name: "Engine Room",
+        icon: "🧠",
+        unlocked: conditioning7 >= 5,
+        progress: Math.min(1, conditioning7 / 5),
+        detail: "5 conditieprikkels in 7 dagen",
+      },
+      {
+        id: "volume-300",
+        name: "300 Club",
+        icon: "⏱️",
+        unlocked: totalMinutes7 >= 300,
+        progress: Math.min(1, totalMinutes7 / 300),
+        detail: "300 trainingsminuten in 7 dagen",
+      },
+      {
+        id: "distance-20",
+        name: "Twenty K",
+        icon: "🗺️",
+        unlocked: distanceKm7 >= 20,
+        progress: Math.min(1, distanceKm7 / 20),
+        detail: "20 km beweging in 7 dagen",
+      },
+      {
+        id: "month-20",
+        name: "Monthly Grinder",
+        icon: "📆",
+        unlocked: month.length >= 20,
+        progress: Math.min(1, month.length / 20),
+        detail: "20 activiteiten in 28 dagen",
+      },
+      {
+        id: "month-1000",
+        name: "1000 Minute Month",
+        icon: "⌛",
+        unlocked: totalMinutes28 >= 1000,
+        progress: Math.min(1, totalMinutes28 / 1000),
+        detail: "1000 trainingsminuten in 28 dagen",
+      },
+      {
+        id: "month-50k",
+        name: "50K Movement",
+        icon: "🌍",
+        unlocked: distanceKm28 >= 50,
+        progress: Math.min(1, distanceKm28 / 50),
+        detail: "50 km beweging in 28 dagen",
+      },
+      {
+        id: "six-week-run",
+        name: "Built Different",
+        icon: "👑",
+        unlocked: weeksActive42 >= 6,
+        progress: Math.min(1, weeksActive42 / 6),
+        detail: "Actief in alle 6 recente weken",
+      },
     ];
 
     return NextResponse.json({
@@ -163,6 +240,8 @@ export async function GET() {
         totalMinutes7,
         distanceKm7: Math.round(distanceKm7 * 10) / 10,
         weeksActive42,
+        totalMinutes28,
+        distanceKm28: Math.round(distanceKm28 * 10) / 10,
       },
       missions: [
         {
