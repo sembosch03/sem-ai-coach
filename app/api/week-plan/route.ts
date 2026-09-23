@@ -24,19 +24,34 @@ function outputText(data: Record<string, unknown>) {
   return null;
 }
 
-function fallbackWeek() {
+type Preferences = {
+  tuesdayFootball?: boolean;
+  thursdayFootball?: boolean;
+  sundayMatch?: boolean;
+  gymDaysTarget?: number;
+  legDayTarget?: number;
+  extraNote?: string;
+};
+
+function fallbackWeek(preferences: Preferences = {}) {
   return [
     { day: "Monday", focus: "Gym", session: "Upper body + rustige zone 2 optioneel", intensity: "RPE 6-7", note: "Geen zware benen vlak voor voetbal." },
-    { day: "Tuesday", focus: "Football", session: "Teamtraining", intensity: "RPE 6-8", note: "Geen extra harde intervals." },
+    preferences.tuesdayFootball === false
+      ? { day: "Tuesday", focus: "Gym / Conditioning", session: "Normale gymsessie of rustige conditie", intensity: "RPE 6-7", note: "Geen voetbal ingepland." }
+      : { day: "Tuesday", focus: "Football", session: "Teamtraining", intensity: "RPE 6-8", note: "Geen extra harde intervals." },
     { day: "Wednesday", focus: "Gym", session: "Upper body / lichte benen afhankelijk van herstel", intensity: "RPE 6-7", note: "Herstel van dinsdag bewaken." },
-    { day: "Thursday", focus: "Football", session: "Teamtraining", intensity: "RPE 6-8", note: "Voetbal is de hoofdconditieprikkel." },
+    preferences.thursdayFootball === false
+      ? { day: "Thursday", focus: "Gym / Conditioning", session: "Kracht of conditionele prikkel", intensity: "RPE 6-7", note: "Geen voetbal ingepland." }
+      : { day: "Thursday", focus: "Football", session: "Teamtraining", intensity: "RPE 6-8", note: "Voetbal is de hoofdconditieprikkel." },
     { day: "Friday", focus: "Gym", session: "Upper body, benen alleen licht", intensity: "RPE 6", note: "Zondag wedstrijd in beeld houden." },
     { day: "Saturday", focus: "Recovery", session: "Rust / mobiliteit / korte wandeling", intensity: "RPE 2-3", note: "Fris worden voor de wedstrijd." },
-    { day: "Sunday", focus: "Match", session: "Voetbalwedstrijd", intensity: "Match", note: "Geen extra conditioning." }
+    preferences.sundayMatch === false
+      ? { day: "Sunday", focus: "Recovery / Gym", session: "Rustige training of herstel", intensity: "RPE 4-6", note: "Geen wedstrijd ingepland." }
+      : { day: "Sunday", focus: "Match", session: "Voetbalwedstrijd", intensity: "Match", note: "Geen extra conditioning." }
   ];
 }
 
-export async function GET() {
+async function generateWeek(preferences: Preferences = {}) {
   const intervalsKey = process.env.INTERVALS_API_KEY;
   if (!intervalsKey) {
     return NextResponse.json({ error: "INTERVALS_API_KEY ontbreekt" }, { status: 500 });
@@ -72,7 +87,14 @@ export async function GET() {
 
     const context = {
       goal: "Voetbalconditie sterk verbeteren terwijl kracht en spiermassa behouden blijven.",
-      weeklyRhythm: "Voetbaltraining meestal dinsdag en donderdag, wedstrijd zondag. Gym 4-6x per week.",
+      weeklyRhythm: {
+        tuesdayFootball: preferences.tuesdayFootball ?? true,
+        thursdayFootball: preferences.thursdayFootball ?? true,
+        sundayMatch: preferences.sundayMatch ?? true,
+        gymDaysTarget: preferences.gymDaysTarget ?? 5,
+        legDayTarget: preferences.legDayTarget ?? 1,
+        extraNote: preferences.extraNote ?? "",
+      },
       wellness: wellness.slice(0, 7).map((row) => ({
         date: dateValue(row),
         sleepScore: numberFrom(row, ["sleepScore", "sleep_score"]),
@@ -98,7 +120,7 @@ export async function GET() {
     if (!openAiKey) {
       return NextResponse.json({
         mode: "fallback",
-        week: fallbackWeek(),
+        week: fallbackWeek(preferences),
         summary: "OpenAI API is nog niet actief in deze deployment; basisweek wordt gebruikt.",
       });
     }
@@ -163,7 +185,7 @@ export async function GET() {
     if (!response.ok) {
       return NextResponse.json({
         mode: "fallback",
-        week: fallbackWeek(),
+        week: fallbackWeek(preferences),
         summary: `AI API fout (HTTP ${response.status}); basisweek wordt gebruikt.`,
       });
     }
@@ -173,7 +195,7 @@ export async function GET() {
     if (!text) {
       return NextResponse.json({
         mode: "fallback",
-        week: fallbackWeek(),
+        week: fallbackWeek(preferences),
         summary: "AI gaf geen bruikbaar antwoord; basisweek wordt gebruikt.",
       });
     }
@@ -185,4 +207,19 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+
+export async function GET() {
+  return generateWeek();
+}
+
+export async function POST(request: Request) {
+  let preferences: Preferences = {};
+  try {
+    preferences = (await request.json()) as Preferences;
+  } catch {
+    preferences = {};
+  }
+  return generateWeek(preferences);
 }
