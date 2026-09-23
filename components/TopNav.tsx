@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 const links = [
   { href: "/", label: "Coach", icon: "⚡" },
+  { href: "/coach-chat", label: "AI Chat", icon: "💬" },
   { href: "/match-center", label: "Match", icon: "⚽" },
   { href: "/progress", label: "Progress", icon: "📈" },
   { href: "/recovery", label: "Recovery", icon: "💤" },
