@@ -3,9 +3,9 @@ import ProgressionEngine from "@/components/ProgressionEngine";
 
 export default function ProgressPage() {
   return (
-    <main className="min-h-screen bg-zinc-950 pb-24 text-white">
+    <main className="min-h-screen pb-24 text-white">
       <TopNav />
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+      <div className="app-page">
         <div className="mb-5">
           <p className="text-xs text-cyan-300">PERFORMANCE ANALYTICS</p>
           <h1 className="mt-1 text-3xl font-bold">Progress</h1>
