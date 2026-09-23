@@ -12,6 +12,7 @@ const links = [
   { href: "/goals", label: "Goals", icon: "🎯" },
   { href: "/trophies", label: "Trophies", icon: "🏆" },
   { href: "/history", label: "History", icon: "🗓️" },
+  { href: "/feedback", label: "Feedback", icon: "🧠" },
   { href: "/profile", label: "Profiel", icon: "👤" },
 ];
 
