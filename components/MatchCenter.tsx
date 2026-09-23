@@ -31,10 +31,10 @@ type Readiness = {
 function Ring({ value, label }: { value: number; label: string }) {
   const angle = Math.round((value / 100) * 360);
   return (
-    <div className="relative grid h-36 w-36 place-items-center rounded-full" style={{ background: `conic-gradient(currentColor ${angle}deg, #27272a ${angle}deg)` }}>
-      <div className="grid h-28 w-28 place-items-center rounded-full bg-zinc-950 text-center">
+    <div className="relative grid h-32 w-32 place-items-center rounded-full" style={{ background: `conic-gradient(currentColor ${angle}deg, #27272a ${angle}deg)` }}>
+      <div className="grid h-24 w-24 place-items-center rounded-full bg-zinc-950 text-center">
         <div>
-          <p className="text-3xl font-black">{value}</p>
+          <p className="text-2xl font-bold tracking-tight">{value}</p>
           <p className="text-[10px] text-zinc-500">{label}</p>
         </div>
       </div>
@@ -56,11 +56,11 @@ export default function MatchCenter() {
 
   return (
     <div className="space-y-4">
-      <section className="overflow-hidden rounded-3xl border border-violet-900/50 bg-gradient-to-br from-violet-950/30 via-zinc-900 to-zinc-950 p-6">
+      <section className="app-card p-5 sm:p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs text-violet-300">MATCH CENTER</p>
-            <h1 className="mt-1 text-3xl font-bold">Vandaag: {data.status}</h1>
+            <p className="app-eyebrow">MATCH CENTER</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Vandaag: {data.status}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400">{data.recommendation}</p>
           </div>
           <div className="flex flex-wrap gap-5 text-violet-400">
@@ -73,7 +73,7 @@ export default function MatchCenter() {
 
       <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {data.factors.map((factor) => (
-          <div key={factor.label} className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+          <div key={factor.label} className="app-card p-4">
             <div className="flex items-center justify-between">
               <p className="text-xs text-zinc-500">{factor.label.toUpperCase()}</p>
               <span className={"text-xs font-semibold " + (factor.impact > 0 ? "text-emerald-400" : factor.impact < 0 ? "text-amber-400" : "text-zinc-500")}>
@@ -86,7 +86,7 @@ export default function MatchCenter() {
       </section>
 
       <section className="grid gap-3 lg:grid-cols-2">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="app-card p-5">
           <p className="text-xs text-zinc-500">BODY SIGNALS</p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div><p className="text-[10px] text-zinc-600">ENERGY</p><p className="mt-1 text-xl font-semibold">{data.checkIn.energy}/10</p></div>
@@ -96,7 +96,7 @@ export default function MatchCenter() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="app-card p-5">
           <p className="text-xs text-zinc-500">RECOVERY DATA</p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div><p className="text-[10px] text-zinc-600">SLEEP</p><p className="mt-1 text-xl font-semibold">{data.signals.sleepScore ?? data.signals.sleepHours ?? "--"}</p></div>

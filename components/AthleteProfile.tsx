@@ -78,29 +78,29 @@ export default function AthleteProfile() {
 
   return (
     <div className="space-y-4">
-      <section className="overflow-hidden rounded-3xl border border-violet-900/50 bg-gradient-to-br from-violet-950/30 via-zinc-900 to-zinc-950 p-6">
+      <section className="app-card p-5 sm:p-6">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="grid h-20 w-20 place-items-center rounded-3xl bg-white text-3xl font-black text-black">
               {profile.displayName.slice(0, 1).toUpperCase()}
             </div>
             <div>
-              <p className="text-xs text-violet-300">ATHLETE PROFILE</p>
-              <h1 className="mt-1 text-3xl font-bold">{profile.displayName}</h1>
+              <p className="app-eyebrow">ATHLETE PROFILE</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">{profile.displayName}</h1>
               <p className="mt-1 text-sm text-zinc-500">{profile.team || "Geen team"}{profile.position ? ` · ${profile.position}` : ""}</p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/70 px-5 py-4 text-right">
+          <div className="rounded-2xl border border-white/[.06] bg-white/[.025] px-5 py-4 text-right">
             <p className="text-xs text-zinc-500">PERFORMANCE LEVEL</p>
             <p className="mt-1 text-3xl font-black">LVL {level ?? "--"}</p>
-            <p className="text-xs text-violet-300">{xp ?? "--"} XP total</p>
+            <p className="app-eyebrow">{xp ?? "--"} XP total</p>
           </div>
         </div>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 lg:col-span-2">
+        <div className="app-card p-5 lg:col-span-2">
           <p className="text-xs text-zinc-500">BASIS</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Field label="Naam"><input value={profile.displayName} onChange={(e) => update("displayName", e.target.value)} className="input" /></Field>
@@ -112,7 +112,7 @@ export default function AthleteProfile() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="app-card p-5">
           <p className="text-xs text-zinc-500">TRAINING DNA</p>
           <div className="mt-4 space-y-3">
             <Select label="Gymdagen doel" value={profile.gymDaysTarget} values={[3,4,5,6]} onChange={(v) => update("gymDaysTarget", v)} />
@@ -122,7 +122,7 @@ export default function AthleteProfile() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+      <section className="app-card p-5">
         <p className="text-xs text-zinc-500">PRIMARY GOAL</p>
         <textarea
           value={profile.primaryGoal}

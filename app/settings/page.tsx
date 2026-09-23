@@ -21,9 +21,9 @@ export default function SettingsPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-zinc-950 pb-24 text-white">
+    <main className="min-h-screen pb-24 text-white">
       <TopNav />
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+      <div className="app-page-narrow">
         <div>
           <p className="text-xs text-zinc-500">SYSTEM</p>
           <h1 className="mt-1 text-3xl font-bold">Settings & Integrations</h1>
