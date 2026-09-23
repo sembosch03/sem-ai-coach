@@ -1,5 +1,6 @@
 import { assessCoach } from "@/lib/coach";
 import { buildDayPlan } from "@/lib/day-plan";
+import AiCoachPlan from "@/components/AiCoachPlan";
 
 type DataRow = Record<string, unknown>;
 
@@ -95,15 +96,30 @@ export default async function Home() {
   );
   const latest = wellness[0];
 
-  const fitness = numberFrom(latest, ["ctl", "icu_ctl", "fitness"]);
-  const fatigue = numberFrom(latest, ["atl", "icu_atl", "fatigue"]);
-  const formRaw = numberFrom(latest, ["tsb", "icu_tsb", "form"]);
+  const latestNumber = (keys: string[]) => {
+    for (const row of wellness) {
+      const value = numberFrom(row, keys);
+      if (value !== null) return value;
+    }
+    return null;
+  };
+
+  const fitness = latestNumber(["ctl", "icu_ctl", "fitness"]);
+  const fatigue = latestNumber(["atl", "icu_atl", "fatigue"]);
+  const formRaw = latestNumber(["tsb", "icu_tsb", "form"]);
   const form =
     formRaw ?? (fitness !== null && fatigue !== null ? fitness - fatigue : null);
-  const hrv = numberFrom(latest, ["hrv", "hrv_rmssd", "rmssd"]);
-  const restingHr = numberFrom(latest, ["restingHR", "resting_hr", "restingHr"]);
-  const sleepScore = numberFrom(latest, ["sleepScore", "sleep_score"]);
-  const readiness = numberFrom(latest, ["readiness", "readiness_score"]);
+  const hrv = latestNumber(["hrv", "hrv_rmssd", "rmssd"]);
+  const restingHr = latestNumber(["restingHR", "resting_hr", "restingHr"]);
+  const sleepScore = latestNumber(["sleepScore", "sleep_score"]);
+  const sleepSecs = latestNumber(["sleepSecs", "sleep_secs"]);
+  const readiness = latestNumber(["readiness", "readiness_score"]);
+  const sleepDisplay =
+    sleepScore !== null
+      ? String(Math.round(sleepScore))
+      : sleepSecs !== null
+        ? `${Math.floor(sleepSecs / 3600)}u ${Math.round((sleepSecs % 3600) / 60)}m`
+        : "--";
 
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -127,7 +143,7 @@ export default async function Home() {
     { title: "Fatigue", value: formatNumber(fatigue), sub: "ATL · Intervals.icu" },
     { title: "Form", value: formatNumber(form), sub: "TSB · fitness minus fatigue" },
     { title: "HRV", value: formatNumber(hrv, " ms"), sub: "Laatste wellnessmeting" },
-    { title: "Sleep", value: formatNumber(sleepScore), sub: "Garmin sleep score" },
+    { title: "Sleep", value: sleepDisplay, sub: sleepScore !== null ? "Garmin sleep score" : "Laatste slaapduur" },
     { title: "Resting HR", value: formatNumber(restingHr, " bpm"), sub: "Rusthartslag" },
     { title: "Weekly Load", value: formatNumber(weeklyLoad), sub: `${weeklyActivities.length} activiteiten · 7 dagen` },
   ];
@@ -144,7 +160,7 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.4</p>
+            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.5</p>
             <h1 className="text-4xl font-bold">AI Football Coach</h1>
             <p className="mt-2 text-zinc-400">Football · Conditioning · Strength · Recovery</p>
           </div>
@@ -168,6 +184,8 @@ export default async function Home() {
             </div>
           ))}
         </section>
+
+        <AiCoachPlan />
 
         <section className="mt-6 rounded-2xl border border-emerald-900 bg-emerald-950/30 p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
