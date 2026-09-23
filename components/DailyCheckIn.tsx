@@ -26,20 +26,41 @@ export default function DailyCheckIn({
   onChange?: (value: DailyCheckInData) => void;
 }) {
   const [data, setData] = useState<DailyCheckInData>(defaults);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
 
   useEffect(() => {
-    const saved = localStorage.getItem("sem-daily-checkin");
-    if (saved) {
+    let active = true;
+
+    async function load() {
       try {
-        const parsed = { ...defaults, ...JSON.parse(saved) };
-        setData(parsed);
-        onChange?.(parsed);
-      } catch {
-        onChange?.(defaults);
+        const response = await fetch("/api/checkin", { cache: "no-store" });
+        const payload = await response.json();
+        if (active && payload.checkIn) {
+          const next = { ...defaults, ...payload.checkIn };
+          setData(next);
+          localStorage.setItem("sem-daily-checkin", JSON.stringify(next));
+          onChange?.(next);
+          return;
+        }
+      } catch {}
+
+      const saved = localStorage.getItem("sem-daily-checkin");
+      if (active && saved) {
+        try {
+          const parsed = { ...defaults, ...JSON.parse(saved) };
+          setData(parsed);
+          onChange?.(parsed);
+          return;
+        } catch {}
       }
-    } else {
-      onChange?.(defaults);
+
+      if (active) onChange?.(defaults);
     }
+
+    load();
+    return () => {
+      active = false;
+    };
   }, [onChange]);
 
   const status = useMemo(() => {
@@ -74,8 +95,24 @@ export default function DailyCheckIn({
   function update<K extends keyof DailyCheckInData>(key: K, value: DailyCheckInData[K]) {
     const next = { ...data, [key]: value };
     setData(next);
+    setSaveState("idle");
     localStorage.setItem("sem-daily-checkin", JSON.stringify(next));
     onChange?.(next);
+  }
+
+  async function save() {
+    setSaveState("saving");
+    localStorage.setItem("sem-daily-checkin", JSON.stringify(data));
+    try {
+      await fetch("/api/checkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+    } catch {
+      // Local storage remains the fallback.
+    }
+    setSaveState("saved");
   }
 
   const slider = (
@@ -157,9 +194,18 @@ export default function DailyCheckIn({
         </label>
       </div>
 
-      <div className="mt-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3">
-        <p className="text-xs font-semibold text-zinc-300">{status.title}</p>
-        <p className="mt-1 text-xs leading-5 text-zinc-500">{status.text}</p>
+      <div className="mt-3 flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-950 p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-zinc-300">{status.title}</p>
+          <p className="mt-1 text-xs leading-5 text-zinc-500">{status.text}</p>
+        </div>
+        <button
+          onClick={save}
+          disabled={saveState === "saving"}
+          className="shrink-0 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-black disabled:opacity-50"
+        >
+          {saveState === "saving" ? "Opslaan…" : saveState === "saved" ? "✓ Opgeslagen" : "Check-in opslaan"}
+        </button>
       </div>
     </section>
   );
