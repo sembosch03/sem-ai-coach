@@ -9,6 +9,7 @@ const links = [
   { href: "/match-center", label: "Match", icon: "⚽" },
   { href: "/progress", label: "Progress", icon: "📈" },
   { href: "/recovery", label: "Recovery", icon: "💤" },
+  { href: "/goals", label: "Goals", icon: "🎯" },
   { href: "/trophies", label: "Trophies", icon: "🏆" },
   { href: "/history", label: "History", icon: "🗓️" },
   { href: "/profile", label: "Profiel", icon: "👤" },
@@ -75,7 +76,7 @@ export default function TopNav() {
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-800 bg-zinc-950/95 px-2 py-2 backdrop-blur lg:hidden">
-        <div className="mx-auto grid max-w-2xl grid-cols-7 gap-1">
+        <div className="mx-auto flex max-w-3xl gap-1 overflow-x-auto">
           {links.map((link) => {
             const active = pathname === link.href;
             return (
@@ -83,7 +84,7 @@ export default function TopNav() {
                 key={link.href}
                 href={link.href}
                 className={
-                  "flex flex-col items-center rounded-lg px-1 py-1.5 text-[9px] " +
+                  "flex min-w-[62px] flex-col items-center rounded-lg px-1 py-1.5 text-[9px] " +
                   (active ? "bg-zinc-800 text-white" : "text-zinc-500")
                 }
               >
