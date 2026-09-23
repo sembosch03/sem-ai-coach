@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import DailyCheckIn, { type DailyCheckInData } from "@/components/DailyCheckIn";
 
 type DayMode = "auto" | "gym" | "football" | "gym_football" | "match" | "rest" | "unavailable";
 
@@ -33,6 +34,28 @@ type Review = {
   football: string;
   conditioning: string;
   motivation: string;
+};
+
+type Progress = {
+  xp: number;
+  level: number;
+  levelXp: number;
+  nextLevelXp: number;
+  stats: {
+    activities7: number;
+    football7: number;
+    conditioning7: number;
+    totalMinutes7: number;
+    distanceKm7: number;
+  };
+  trophies: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    unlocked: boolean;
+    progress: number;
+    detail: string;
+  }>;
 };
 
 const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
@@ -83,6 +106,16 @@ export default function PerformanceOS() {
   const [choices, setChoices] = useState<Record<string, DayChoice>>(defaultChoices);
   const [gymDaysTarget, setGymDaysTarget] = useState(5);
   const [legDayTarget, setLegDayTarget] = useState(1);
+  const [conditioningPriority, setConditioningPriority] = useState(5);
+  const [checkIn, setCheckIn] = useState<DailyCheckInData>({
+    energy: 7,
+    legSoreness: 3,
+    shinPain: 0,
+    motivation: 7,
+    availableMinutes: 75,
+    note: "",
+  });
+  const [progress, setProgress] = useState<Progress | null>(null);
   const [editing, setEditing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(todayName());
   const [loading, setLoading] = useState(false);
@@ -96,6 +129,13 @@ export default function PerformanceOS() {
     const localChoices = localStorage.getItem("sem-performance-choices");
     const localTargets = localStorage.getItem("sem-performance-targets");
     const localReview = localStorage.getItem(`sem-week-review-${key}`);
+
+    fetch("/api/progress", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.error) setProgress(data);
+      })
+      .catch(() => {});
 
     if (localPlan) {
       try {
@@ -116,6 +156,7 @@ export default function PerformanceOS() {
         const parsed = JSON.parse(localTargets);
         setGymDaysTarget(parsed.gymDaysTarget ?? 5);
         setLegDayTarget(parsed.legDayTarget ?? 1);
+        setConditioningPriority(parsed.conditioningPriority ?? 5);
       } catch {}
     }
 
@@ -161,6 +202,8 @@ export default function PerformanceOS() {
           days: choices,
           gymDaysTarget,
           legDayTarget,
+          conditioningPriority,
+          checkIn,
           force,
         }),
       });
@@ -181,7 +224,7 @@ export default function PerformanceOS() {
       localStorage.setItem("sem-performance-choices", JSON.stringify(choices));
       localStorage.setItem(
         "sem-performance-targets",
-        JSON.stringify({ gymDaysTarget, legDayTarget })
+        JSON.stringify({ gymDaysTarget, legDayTarget, conditioningPriority })
       );
       setEditing(false);
       setMessage(data.mode === "cached" ? "Bestaand weekplan geladen — 0 extra AI-call." : "Nieuw weekplan gemaakt.");
@@ -220,6 +263,73 @@ export default function PerformanceOS() {
 
   return (
     <div className="mt-5 space-y-4">
+      <DailyCheckIn onChange={setCheckIn} />
+
+      {progress && (
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs text-zinc-500">LEVEL & TROPHIES</p>
+              <div className="mt-1 flex items-baseline gap-3">
+                <h3 className="text-xl font-semibold">Level {progress.level}</h3>
+                <span className="text-xs text-zinc-500">{progress.xp} XP totaal</span>
+              </div>
+            </div>
+            <div className="w-full sm:max-w-xs">
+              <div className="flex justify-between text-[10px] text-zinc-500">
+                <span>{progress.levelXp} XP</span>
+                <span>{progress.nextLevelXp} XP</span>
+              </div>
+              <div className="mt-1 h-2 overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full rounded-full bg-violet-500"
+                  style={{ width: `${Math.min(100, (progress.levelXp / progress.nextLevelXp) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {progress.trophies.map((trophy) => (
+              <div
+                key={trophy.id}
+                className={
+                  "rounded-xl border p-3 " +
+                  (trophy.unlocked
+                    ? "border-amber-700/60 bg-amber-950/20"
+                    : "border-zinc-800 bg-zinc-950 opacity-60")
+                }
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{trophy.icon}</span>
+                  <div>
+                    <p className="text-xs font-semibold">{trophy.name}</p>
+                    <p className="text-[10px] text-zinc-500">{trophy.detail}</p>
+                  </div>
+                </div>
+                {!trophy.unlocked && (
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-800">
+                    <div
+                      className="h-full rounded-full bg-zinc-600"
+                      style={{ width: `${Math.round(trophy.progress * 100)}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2 text-[10px] text-zinc-500">
+            <span>{progress.stats.activities7} sessies / 7d</span>
+            <span>•</span>
+            <span>{progress.stats.football7} voetbal</span>
+            <span>•</span>
+            <span>{progress.stats.conditioning7} conditieprikkels</span>
+            <span>•</span>
+            <span>{progress.stats.totalMinutes7} min</span>
+          </div>
+        </section>
+      )}
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -276,6 +386,18 @@ export default function PerformanceOS() {
                   className="ml-2 rounded-lg bg-zinc-900 px-2 py-1 text-white"
                 >
                   {[0,1,2].map((n) => <option key={n}>{n}</option>)}
+                </select>
+              </label>
+              <label className="text-xs text-zinc-400">
+                Conditie prioriteit
+                <select
+                  value={conditioningPriority}
+                  onChange={(e) => setConditioningPriority(Number(e.target.value))}
+                  className="ml-2 rounded-lg bg-zinc-900 px-2 py-1 text-white"
+                >
+                  {[1,2,3,4,5].map((n) => (
+                    <option key={n} value={n}>{n}/5</option>
+                  ))}
                 </select>
               </label>
             </div>
