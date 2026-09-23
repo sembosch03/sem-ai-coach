@@ -88,11 +88,17 @@ export async function GET() {
     const distanceKm28 =
       month.reduce((sum, a) => sum + (numberFrom(a, ["distance"]) ?? 0), 0) / 1000;
 
+    const missionBonus =
+      (football7 >= 2 ? 100 : 0) +
+      (conditioning7 >= 3 ? 100 : 0) +
+      (week.length >= 5 ? 100 : 0);
+
     const xp =
       month.length * 50 +
       football28 * 35 +
       conditioning28 * 20 +
-      Math.min(300, Math.round(totalMinutes7));
+      Math.min(300, Math.round(totalMinutes7)) +
+      missionBonus;
 
     const level = Math.max(1, Math.floor(xp / 500) + 1);
     const levelXp = xp % 500;
@@ -233,6 +239,7 @@ export async function GET() {
       level,
       levelXp,
       nextLevelXp: 500,
+      missionBonus,
       stats: {
         activities7: week.length,
         football7,
