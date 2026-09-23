@@ -8,6 +8,7 @@ const links = [
   { href: "/", label: "Coach", icon: "⚡" },
   { href: "/match-center", label: "Match", icon: "⚽" },
   { href: "/progress", label: "Progress", icon: "📈" },
+  { href: "/recovery", label: "Recovery", icon: "💤" },
   { href: "/trophies", label: "Trophies", icon: "🏆" },
   { href: "/history", label: "History", icon: "🗓️" },
   { href: "/profile", label: "Profiel", icon: "👤" },
@@ -74,7 +75,7 @@ export default function TopNav() {
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-800 bg-zinc-950/95 px-2 py-2 backdrop-blur lg:hidden">
-        <div className="mx-auto grid max-w-xl grid-cols-6 gap-1">
+        <div className="mx-auto grid max-w-2xl grid-cols-7 gap-1">
           {links.map((link) => {
             const active = pathname === link.href;
             return (
