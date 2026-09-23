@@ -42,15 +42,38 @@ export default function AiWeekPlan() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("sem-coach-preferences");
-    if (saved) {
+    let active = true;
+
+    async function loadPreferences() {
       try {
-        setPreferences({ ...defaults, ...JSON.parse(saved) });
+        const response = await fetch("/api/preferences", { cache: "no-store" });
+        const payload = await response.json();
+
+        if (active && payload.preferences) {
+          const next = { ...defaults, ...payload.preferences };
+          setPreferences(next);
+          await loadPlan(next);
+        } else if (active) {
+          setPreferences(defaults);
+          await loadPlan(defaults);
+        }
       } catch {
-        setPreferences(defaults);
+        const saved = localStorage.getItem("sem-coach-preferences");
+        const next = saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+        if (active) {
+          setPreferences(next);
+          await loadPlan(next);
+        }
+      } finally {
+        if (active) setReady(true);
       }
     }
-    setReady(true);
+
+    loadPreferences();
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadPlan(nextPreferences = preferences) {
@@ -68,17 +91,25 @@ export default function AiWeekPlan() {
     }
   }
 
-  useEffect(() => {
-    if (ready) loadPlan(preferences);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+
 
   function update<K extends keyof Preferences>(key: K, value: Preferences[K]) {
     setPreferences((current) => ({ ...current, [key]: value }));
   }
 
-  function saveAndReplan() {
+  async function saveAndReplan() {
     localStorage.setItem("sem-coach-preferences", JSON.stringify(preferences));
+
+    try {
+      await fetch("/api/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(preferences),
+      });
+    } catch {
+      // Local storage remains the fallback when cloud persistence is unavailable.
+    }
+
     setSettingsOpen(false);
     loadPlan(preferences);
   }
