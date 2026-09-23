@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import DailyCheckIn, { type DailyCheckInData } from "@/components/DailyCheckIn";
 import ConditioningLab from "@/components/ConditioningLab";
-import ProgressionEngine from "@/components/ProgressionEngine";
 
 type DayMode = "auto" | "gym" | "football" | "gym_football" | "match" | "rest" | "unavailable";
 
@@ -38,34 +37,6 @@ type Review = {
   motivation: string;
 };
 
-type Progress = {
-  xp: number;
-  level: number;
-  levelXp: number;
-  nextLevelXp: number;
-  stats: {
-    activities7: number;
-    football7: number;
-    conditioning7: number;
-    totalMinutes7: number;
-    distanceKm7: number;
-    weeksActive42: number;
-  };
-  missions: Array<{
-    title: string;
-    done: boolean;
-    progress: string;
-    xp: number;
-  }>;
-  trophies: Array<{
-    id: string;
-    name: string;
-    icon: string;
-    unlocked: boolean;
-    progress: number;
-    detail: string;
-  }>;
-};
 
 const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 
@@ -124,7 +95,6 @@ export default function PerformanceOS() {
     availableMinutes: 75,
     note: "",
   });
-  const [progress, setProgress] = useState<Progress | null>(null);
   const [editing, setEditing] = useState(false);
   const [selectedDay, setSelectedDay] = useState(todayName());
   const [loading, setLoading] = useState(false);
@@ -138,13 +108,6 @@ export default function PerformanceOS() {
     const localChoices = localStorage.getItem("sem-performance-choices");
     const localTargets = localStorage.getItem("sem-performance-targets");
     const localReview = localStorage.getItem(`sem-week-review-${key}`);
-
-    fetch("/api/progress", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => {
-        if (!data.error) setProgress(data);
-      })
-      .catch(() => {});
 
     if (localPlan) {
       try {
@@ -276,99 +239,8 @@ export default function PerformanceOS() {
 
       <ConditioningLab checkIn={checkIn} />
 
-      <ProgressionEngine />
 
-      {progress && (
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs text-zinc-500">LEVEL & TROPHIES</p>
-              <div className="mt-1 flex items-baseline gap-3">
-                <h3 className="text-xl font-semibold">Level {progress.level}</h3>
-                <span className="text-xs text-zinc-500">{progress.xp} XP totaal</span>
-              </div>
-            </div>
-            <div className="w-full sm:max-w-xs">
-              <div className="flex justify-between text-[10px] text-zinc-500">
-                <span>{progress.levelXp} XP</span>
-                <span>{progress.nextLevelXp} XP</span>
-              </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-zinc-800">
-                <div
-                  className="h-full rounded-full bg-violet-500"
-                  style={{ width: `${Math.min(100, (progress.levelXp / progress.nextLevelXp) * 100)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            {progress.trophies.map((trophy) => (
-              <div
-                key={trophy.id}
-                className={
-                  "rounded-xl border p-3 " +
-                  (trophy.unlocked
-                    ? "border-amber-700/60 bg-amber-950/20"
-                    : "border-zinc-800 bg-zinc-950 opacity-60")
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{trophy.icon}</span>
-                  <div>
-                    <p className="text-xs font-semibold">{trophy.name}</p>
-                    <p className="text-[10px] text-zinc-500">{trophy.detail}</p>
-                  </div>
-                </div>
-                {!trophy.unlocked && (
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-800">
-                    <div
-                      className="h-full rounded-full bg-zinc-600"
-                      style={{ width: `${Math.round(trophy.progress * 100)}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2 text-[10px] text-zinc-500">
-            <span>{progress.stats.activities7} sessies / 7d</span>
-            <span>•</span>
-            <span>{progress.stats.football7} voetbal</span>
-            <span>•</span>
-            <span>{progress.stats.conditioning7} conditieprikkels</span>
-            <span>•</span>
-            <span>{progress.stats.totalMinutes7} min</span>
-            <span>•</span>
-            <span>{progress.stats.weeksActive42} actieve weken</span>
-          </div>
-
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            {progress.missions.map((mission) => (
-              <div
-                key={mission.title}
-                className={
-                  "rounded-xl border p-3 " +
-                  (mission.done
-                    ? "border-emerald-800 bg-emerald-950/20"
-                    : "border-zinc-800 bg-zinc-950")
-                }
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold">{mission.title}</p>
-                  <span className="text-[10px] text-violet-300">+{mission.xp} XP</span>
-                </div>
-                <p className="mt-1 text-[10px] text-zinc-500">{mission.progress}</p>
-                <p className="mt-2 text-[10px] font-medium">
-                  {mission.done ? "✓ Mission complete" : "Nog te pakken"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+      <section className="app-card p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-medium text-violet-300">PERFORMANCE OS</p>
@@ -473,7 +345,7 @@ export default function PerformanceOS() {
 
       {plan && (
         <>
-          <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+          <section className="app-card p-4">
             <div className="grid grid-cols-4 gap-2 md:grid-cols-7">
               {plan.days.map((day) => (
                 <button
@@ -520,14 +392,14 @@ export default function PerformanceOS() {
                 <p className="mt-2 text-sm leading-6 text-zinc-200">{selected.conditioning}</p>
               </div>
 
-              <div className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+              <div className="app-card p-4">
                 <p className="text-xs text-zinc-500">COACH TIP</p>
                 <p className="mt-2 text-sm leading-6 text-zinc-300">{selected.tip}</p>
               </div>
             </section>
           )}
 
-          <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+          <section className="app-card p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs text-zinc-500">WEEK COACH TIP</p>
@@ -538,7 +410,7 @@ export default function PerformanceOS() {
         </>
       )}
 
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+      <section className="app-card p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-zinc-500">WEEK REVIEW</p>
