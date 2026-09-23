@@ -141,7 +141,7 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-medium text-emerald-400">SEM PERFORMANCE · V1.0</p>
+            <p className="text-xs font-medium text-emerald-400">SEM PERFORMANCE · V1.1 BEAST MODE</p>
             <h1 className="text-3xl font-bold">Performance Coach</h1>
           </div>
           <div className="flex items-center gap-2">
