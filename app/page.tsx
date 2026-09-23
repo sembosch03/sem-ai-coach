@@ -1,6 +1,7 @@
 import { assessCoach } from "@/lib/coach";
 import { buildDayPlan } from "@/lib/day-plan";
 import AiCoachPlan from "@/components/AiCoachPlan";
+import AiWeekPlan from "@/components/AiWeekPlan";
 
 type DataRow = Record<string, unknown>;
 
@@ -160,7 +161,7 @@ export default async function Home() {
       <div className="mx-auto max-w-7xl px-6 py-10">
         <header className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.5</p>
+            <p className="text-sm text-emerald-400">SEM PERFORMANCE · V0.6</p>
             <h1 className="text-4xl font-bold">AI Football Coach</h1>
             <p className="mt-2 text-zinc-400">Football · Conditioning · Strength · Recovery</p>
           </div>
@@ -186,6 +187,8 @@ export default async function Home() {
         </section>
 
         <AiCoachPlan />
+
+        <AiWeekPlan />
 
         <section className="mt-6 rounded-2xl border border-emerald-900 bg-emerald-950/30 p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
