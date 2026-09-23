@@ -17,31 +17,167 @@ type Payload = {
   error?: string;
 };
 
+type Preferences = {
+  tuesdayFootball: boolean;
+  thursdayFootball: boolean;
+  sundayMatch: boolean;
+  gymDaysTarget: number;
+  legDayTarget: number;
+  extraNote: string;
+};
+
+const defaults: Preferences = {
+  tuesdayFootball: true,
+  thursdayFootball: true,
+  sundayMatch: true,
+  gymDaysTarget: 5,
+  legDayTarget: 1,
+  extraNote: "",
+};
+
 export default function AiWeekPlan() {
   const [data, setData] = useState<Payload | null>(null);
+  const [preferences, setPreferences] = useState<Preferences>(defaults);
+  const [ready, setReady] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
-    let active = true;
-    fetch("/api/week-plan", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((payload) => active && setData(payload))
-      .catch(() => active && setData({ error: "Weekplanner kon niet laden." }));
-    return () => {
-      active = false;
-    };
+    const saved = localStorage.getItem("sem-coach-preferences");
+    if (saved) {
+      try {
+        setPreferences({ ...defaults, ...JSON.parse(saved) });
+      } catch {
+        setPreferences(defaults);
+      }
+    }
+    setReady(true);
   }, []);
+
+  async function loadPlan(nextPreferences = preferences) {
+    setData(null);
+    try {
+      const response = await fetch("/api/week-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify(nextPreferences),
+      });
+      setData(await response.json());
+    } catch {
+      setData({ error: "Weekplanner kon niet laden." });
+    }
+  }
+
+  useEffect(() => {
+    if (ready) loadPlan(preferences);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
+
+  function update<K extends keyof Preferences>(key: K, value: Preferences[K]) {
+    setPreferences((current) => ({ ...current, [key]: value }));
+  }
+
+  function saveAndReplan() {
+    localStorage.setItem("sem-coach-preferences", JSON.stringify(preferences));
+    setSettingsOpen(false);
+    loadPlan(preferences);
+  }
 
   return (
     <section className="mt-6 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm text-zinc-400">AI WEEKPLANNER</p>
           <h2 className="mt-1 text-2xl font-semibold">Komende 7 dagen</h2>
         </div>
-        <span className="text-sm text-zinc-500">
-          {!data ? "Laden…" : data.mode === "ai" ? "LIVE AI" : "SAFE FALLBACK"}
-        </span>
+
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-zinc-500">
+            {!data ? "Laden…" : data.mode === "ai" ? "LIVE AI" : "SAFE FALLBACK"}
+          </span>
+          <button
+            onClick={() => setSettingsOpen((open) => !open)}
+            className="rounded-xl border border-zinc-700 bg-zinc-950 px-4 py-2 text-sm text-zinc-200"
+          >
+            Planning aanpassen
+          </button>
+        </div>
       </div>
+
+      {settingsOpen && (
+        <div className="mt-5 rounded-2xl border border-zinc-800 bg-zinc-950 p-5">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              ["Dinsdag voetbal", "tuesdayFootball"],
+              ["Donderdag voetbal", "thursdayFootball"],
+              ["Zondag wedstrijd", "sundayMatch"],
+            ].map(([label, key]) => (
+              <label key={key} className="flex items-center justify-between rounded-xl border border-zinc-800 p-4 text-sm">
+                <span>{label}</span>
+                <input
+                  type="checkbox"
+                  checked={preferences[key as keyof Preferences] as boolean}
+                  onChange={(event) =>
+                    update(key as "tuesdayFootball" | "thursdayFootball" | "sundayMatch", event.target.checked)
+                  }
+                  className="h-4 w-4"
+                />
+              </label>
+            ))}
+
+            <label className="rounded-xl border border-zinc-800 p-4 text-sm">
+              <span className="block text-zinc-400">Gymdagen doel</span>
+              <select
+                value={preferences.gymDaysTarget}
+                onChange={(event) => update("gymDaysTarget", Number(event.target.value))}
+                className="mt-2 w-full rounded-lg bg-zinc-900 p-2"
+              >
+                {[3, 4, 5, 6].map((value) => (
+                  <option key={value} value={value}>{value} dagen</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="rounded-xl border border-zinc-800 p-4 text-sm">
+              <span className="block text-zinc-400">Beendagen doel</span>
+              <select
+                value={preferences.legDayTarget}
+                onChange={(event) => update("legDayTarget", Number(event.target.value))}
+                className="mt-2 w-full rounded-lg bg-zinc-900 p-2"
+              >
+                {[0, 1, 2].map((value) => (
+                  <option key={value} value={value}>{value} per week</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="rounded-xl border border-zinc-800 p-4 text-sm md:col-span-2 lg:col-span-1">
+              <span className="block text-zinc-400">Extra voor deze week</span>
+              <input
+                value={preferences.extraNote}
+                onChange={(event) => update("extraNote", event.target.value)}
+                placeholder="Bijv. vrijdag geen tijd"
+                className="mt-2 w-full rounded-lg bg-zinc-900 p-2 outline-none"
+              />
+            </label>
+          </div>
+
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={saveAndReplan}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black"
+            >
+              Opslaan + opnieuw plannen
+            </button>
+            <button
+              onClick={() => setSettingsOpen(false)}
+              className="rounded-xl border border-zinc-700 px-4 py-2 text-sm"
+            >
+              Annuleren
+            </button>
+          </div>
+        </div>
+      )}
 
       {data?.error ? (
         <p className="mt-5 text-sm text-red-300">{data.error}</p>
