@@ -53,3 +53,35 @@ on public.weekly_plans
 for update
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+
+create table if not exists public.daily_checkins (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  checkin_date date not null,
+  energy integer not null check (energy between 0 and 10),
+  leg_soreness integer not null check (leg_soreness between 0 and 10),
+  shin_pain integer not null check (shin_pain between 0 and 10),
+  motivation integer not null check (motivation between 0 and 10),
+  available_minutes integer not null default 60,
+  note text not null default '',
+  created_at timestamptz not null default now(),
+  primary key (user_id, checkin_date)
+);
+
+alter table public.daily_checkins enable row level security;
+
+create policy "Users can read own daily checkins"
+on public.daily_checkins
+for select
+using (auth.uid() = user_id);
+
+create policy "Users can insert own daily checkins"
+on public.daily_checkins
+for insert
+with check (auth.uid() = user_id);
+
+create policy "Users can update own daily checkins"
+on public.daily_checkins
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
