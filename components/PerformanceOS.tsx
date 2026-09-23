@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import DailyCheckIn, { type DailyCheckInData } from "@/components/DailyCheckIn";
+import ConditioningLab from "@/components/ConditioningLab";
 
 type DayMode = "auto" | "gym" | "football" | "gym_football" | "match" | "rest" | "unavailable";
 
@@ -47,7 +48,14 @@ type Progress = {
     conditioning7: number;
     totalMinutes7: number;
     distanceKm7: number;
+    weeksActive42: number;
   };
+  missions: Array<{
+    title: string;
+    done: boolean;
+    progress: string;
+    xp: number;
+  }>;
   trophies: Array<{
     id: string;
     name: string;
@@ -265,6 +273,8 @@ export default function PerformanceOS() {
     <div className="mt-5 space-y-4">
       <DailyCheckIn onChange={setCheckIn} />
 
+      <ConditioningLab checkIn={checkIn} />
+
       {progress && (
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -327,6 +337,31 @@ export default function PerformanceOS() {
             <span>{progress.stats.conditioning7} conditieprikkels</span>
             <span>•</span>
             <span>{progress.stats.totalMinutes7} min</span>
+            <span>•</span>
+            <span>{progress.stats.weeksActive42} actieve weken</span>
+          </div>
+
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            {progress.missions.map((mission) => (
+              <div
+                key={mission.title}
+                className={
+                  "rounded-xl border p-3 " +
+                  (mission.done
+                    ? "border-emerald-800 bg-emerald-950/20"
+                    : "border-zinc-800 bg-zinc-950")
+                }
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-semibold">{mission.title}</p>
+                  <span className="text-[10px] text-violet-300">+{mission.xp} XP</span>
+                </div>
+                <p className="mt-1 text-[10px] text-zinc-500">{mission.progress}</p>
+                <p className="mt-2 text-[10px] font-medium">
+                  {mission.done ? "✓ Mission complete" : "Nog te pakken"}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
       )}
