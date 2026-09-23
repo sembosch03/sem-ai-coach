@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { dateValue, numberFrom, textFrom, type DataRow } from "@/lib/coach";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const iso = (date: Date) => date.toISOString().slice(0, 10);
 
@@ -76,6 +77,22 @@ export async function POST() {
       })
       .map(mapActivity);
 
+    let subjectiveFeedback: Array<Record<string, unknown>> = [];
+    const supabase = await createServerSupabaseClient();
+    if (supabase) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("session_feedback")
+          .select("session_date, session_name, rpe, breathlessness, legs, quality, note")
+          .eq("user_id", user.id)
+          .gte("session_date", iso(sevenAgo))
+          .order("session_date", { ascending: false })
+          .limit(10);
+        subjectiveFeedback = data ?? [];
+      }
+    }
+
     const ai = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -90,14 +107,14 @@ export async function POST() {
             role: "system",
             content: [{
               type: "input_text",
-              text: "Geef een korte, motiverende maar feitelijke weekreview voor een voetballer die zijn conditie wil verbeteren en kracht wil behouden. Vergelijk alleen wat daadwerkelijk in de data staat. Noem concrete progressie als die aantoonbaar is; anders zeg dat er nog te weinig data is. Antwoord uitsluitend volgens JSON-schema."
+              text: "Geef een korte, motiverende maar feitelijke weekreview voor een voetballer die zijn conditie wil verbeteren en kracht wil behouden. Gebruik zowel objectieve activity-data als subjectieve session feedback als die aanwezig is. Vergelijk alleen wat daadwerkelijk in de data staat. Noem concrete progressie als die aantoonbaar is; anders zeg dat er nog te weinig data is. Als de gebruiker meldt dat hij eerder buiten adem was of benen leegliepen, mag je dat samenvatten maar niet als medisch oordeel. Antwoord uitsluitend volgens JSON-schema."
             }]
           },
           {
             role: "user",
             content: [{
               type: "input_text",
-              text: JSON.stringify({ currentWeek: current, previousWeek: previous })
+              text: JSON.stringify({ currentWeek: current, previousWeek: previous, subjectiveFeedback })
             }]
           }
         ],
