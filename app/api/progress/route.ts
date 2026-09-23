@@ -67,6 +67,19 @@ export async function GET() {
     const totalMinutes7 = Math.round(
       week.reduce((sum, a) => sum + (numberFrom(a, ["moving_time", "elapsed_time"]) ?? 0), 0) / 60
     );
+
+    const activeWeeks = new Set<string>();
+    for (const activity of activities) {
+      const raw = dateValue(activity);
+      const date = new Date(raw);
+      if (Number.isNaN(date.getTime())) continue;
+      const day = date.getUTCDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(date);
+      monday.setUTCDate(date.getUTCDate() + diff);
+      activeWeeks.add(monday.toISOString().slice(0, 10));
+    }
+    const weeksActive42 = activeWeeks.size;
     const distanceKm7 =
       week.reduce((sum, a) => sum + (numberFrom(a, ["distance"]) ?? 0), 0) / 1000;
 
@@ -128,6 +141,14 @@ export async function GET() {
         progress: Math.min(1, distanceKm7 / 10),
         detail: "10 km beweging in 7 dagen",
       },
+      {
+        id: "three-week-streak",
+        name: "No Excuses",
+        icon: "🛡️",
+        unlocked: weeksActive42 >= 3,
+        progress: Math.min(1, weeksActive42 / 3),
+        detail: "Actief in 3 verschillende weken",
+      },
     ];
 
     return NextResponse.json({
@@ -141,7 +162,28 @@ export async function GET() {
         conditioning7,
         totalMinutes7,
         distanceKm7: Math.round(distanceKm7 * 10) / 10,
+        weeksActive42,
       },
+      missions: [
+        {
+          title: "Football Engine",
+          done: football7 >= 2,
+          progress: `${football7}/2 voetbalprikkels`,
+          xp: 100,
+        },
+        {
+          title: "Conditioning Builder",
+          done: conditioning7 >= 3,
+          progress: `${conditioning7}/3 conditieprikkels`,
+          xp: 100,
+        },
+        {
+          title: "Consistency",
+          done: week.length >= 5,
+          progress: `${week.length}/5 sessies`,
+          xp: 100,
+        },
+      ],
       trophies,
     });
   } catch (error) {
