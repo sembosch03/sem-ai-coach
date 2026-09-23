@@ -1,4 +1,5 @@
 import AuthBar from "@/components/AuthBar";
+import TopNav from "@/components/TopNav";
 import PerformanceOS from "@/components/PerformanceOS";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -137,11 +138,12 @@ export default async function Home() {
   const recent = data.activities.slice(0, 4);
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
+    <main className="min-h-screen bg-zinc-950 pb-24 text-white">
+      <TopNav />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-medium text-emerald-400">SEM PERFORMANCE · V1.2 PROGRESSION</p>
+            <p className="text-xs font-medium text-emerald-400">SEM PERFORMANCE · V2.0 HUB</p>
             <h1 className="text-3xl font-bold">Performance Coach</h1>
           </div>
           <div className="flex items-center gap-2">
